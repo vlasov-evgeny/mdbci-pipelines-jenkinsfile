@@ -1,0 +1,39 @@
+@Library('mdbci-lib')_
+
+pipeline { 
+    agent any
+    
+    stages {
+        stage('Check boxes') { 
+            steps {
+                sh 'rm -rf vms'
+                sh "mkdir -p vms"
+                script {
+                    def helpers = new Helpers()
+                    def steps = new Steps()
+                    
+                    def libvirtBoxes = readJSON file:'BOXES/boxes_libvirt.json'
+                    def libvirtBoxesResults = steps.checkBoxes(pwd(), libvirtBoxes)
+                    
+                    def awsBoxes = readJSON file:'BOXES/boxes_aws.json'
+                    def awsBoxesResults = steps.checkBoxes(pwd(), awsBoxes)
+                    
+                    echo 'LIBVIRT BOXES RESULTS'
+                    helpers.printHashArrayAsJSON(libvirtBoxesResults)
+                    echo 'AWS BOXES RESULTS'
+                    helpers.printHashArrayAsJSON(awsBoxesResults)
+                }
+            }
+        }
+        stage('Test'){
+            steps {
+                echo 'Hello Test'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Hello Deploy'
+            }
+        }
+    }
+}
